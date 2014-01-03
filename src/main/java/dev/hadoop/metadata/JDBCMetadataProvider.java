@@ -8,10 +8,10 @@ import java.sql.SQLException;
 public class JDBCMetadataProvider extends AbstractJDBCMetadataProvider {
 	
 	protected String [] processResults(ResultSet results) throws IOException, SQLException {
-		String []metadataFileURIs = new String[]{METADATA_FILE_NAME_BASE};
+		String []metadataFileURIs = new String[]{METADATA_FILENAME_BASE};
 		FileWriter writer = new FileWriter(metadataFileURIs[0]);
 		while (results.next()){
-			writer.write(results.getInt(USER_ID_COL)+"\t");
+			writer.write(results.getInt(PRODUCT_ID_COL)+"\t");
 			writer.write(results.getString(CATEGORY_NAME_COL)+"\t");
 			writer.write(results.getDouble(PRICE_COL)+"\n");
 		}		

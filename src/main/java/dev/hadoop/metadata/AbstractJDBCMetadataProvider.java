@@ -1,6 +1,5 @@
 package dev.hadoop.metadata;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,7 +11,7 @@ public abstract class AbstractJDBCMetadataProvider implements MetadataProvider {
 
 	protected static final int PRICE_COL = 4;
 	protected static final int CATEGORY_NAME_COL = 3;
-	protected static final int USER_ID_COL = 1;
+	protected static final int PRODUCT_ID_COL = 1;
 	
 	//connection details
 	public static final String JDBC_HOST = "localhost";

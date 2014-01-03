@@ -29,7 +29,7 @@ public class ReportByUserIdReducerTest {
 	public void prepareTests(){
 		FileWriter writer;
 		try {
-			writer = new FileWriter(MetadataProvider.METADATA_FILE_NAME_BASE);
+			writer = new FileWriter(MetadataProvider.METADATA_FILENAME_BASE);
 			
 			writer.write("1	Fruit	1.00\n");
 			writer.write("2	Fruit	0.75\n");

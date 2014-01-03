@@ -26,7 +26,7 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, IntermediateUser
 	@Override
 	public void setup(Context context) throws IOException, InterruptedException {
 		//TODO use in distributed mode String productsFileName = context.getConfiguration().get("mapred.cache.files");
-		String productsFileName = MetadataProvider.METADATA_FILE_NAME_BASE;
+		String productsFileName = MetadataProvider.METADATA_FILENAME_BASE;
 		BufferedReader productsReader = new BufferedReader(new FileReader(productsFileName));
 
 		String line;

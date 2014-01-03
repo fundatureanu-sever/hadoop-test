@@ -4,7 +4,7 @@ import java.io.IOException;
 
 
 public interface MetadataProvider {
-	public static final String METADATA_FILE_NAME_BASE = "#_metadata";
+	public static final String METADATA_FILENAME_BASE = "#_metadata";
 
 	/**
 	 * Generate metadata files 
