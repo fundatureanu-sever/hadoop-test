@@ -55,5 +55,17 @@ public class DataByCatIdAndQuarter implements Writable{
 	public byte getQuarter() {
 		return quarter;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof DataByCatIdAndQuarter)){
+			return false;
+		}
+		
+		DataByCatIdAndQuarter other = (DataByCatIdAndQuarter)obj;
+		return (categoryId==other.categoryId && quantity==other.quantity && revenue==other.revenue && quarter==other.quarter);
+	}
+	
+	
 	
 }

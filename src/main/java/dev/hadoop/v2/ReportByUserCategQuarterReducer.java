@@ -1,29 +1,42 @@
 package dev.hadoop.v2;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
+import dev.hadoop.metadata.MetadataProvider;
 import dev.hadoop.v2.intermediate.DataByCatIdAndQuarter;
 import dev.hadoop.v2.intermediate.ProductIdQuantityQuarter;
 import dev.hadoop.v2.intermediate.UserCategoryId;
 
-public class ReportByUserCategQuarterReducer extends Reducer< UserCategoryId, ProductIdQuantityQuarter, IntWritable, DataByCatIdAndQuarter> {
+public class ReportByUserCategQuarterReducer extends Reducer<UserCategoryId, ProductIdQuantityQuarter, IntWritable, DataByCatIdAndQuarter> {
 	
 	private HashMap<Integer, Double> productIdToPriceMap = new HashMap<Integer, Double>();
-	
 
 	@Override
-	protected void setup(Context context) throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		super.setup(context);
+	public void setup(Context context) throws IOException, InterruptedException {
+		String productsFileName = MetadataProvider.METADATA_FILENAME_BASE+"_products";
+		
+		BufferedReader productsReader = new BufferedReader(new FileReader(productsFileName));
+
+		String line;
+		while ((line = productsReader.readLine()) != null) {
+			String[] tokens = line.split("\\t");
+			
+			int productId = Integer.parseInt(tokens[0]);
+			double price = Double.parseDouble(tokens[2]);
+			productIdToPriceMap.put(productId, price);
+		}
+
+		productsReader.close();
 	}
 
-
 	@Override
-	protected void reduce(UserCategoryId uidCatId, Iterable<ProductIdQuantityQuarter> values, Context context) throws IOException, InterruptedException {
+	public void reduce(UserCategoryId uidCatId, Iterable<ProductIdQuantityQuarter> values, Context context) throws IOException, InterruptedException {
 		int []quantityPerQuarter = new int[4];
 		double []revenuePerQuarter = new double[4];
 		

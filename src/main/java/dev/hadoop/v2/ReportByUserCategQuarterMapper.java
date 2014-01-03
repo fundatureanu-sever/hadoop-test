@@ -1,5 +1,7 @@
 package dev.hadoop.v2;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -12,23 +14,40 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
+import dev.hadoop.metadata.MetadataProvider;
 import dev.hadoop.v2.intermediate.ProductIdQuantityQuarter;
 import dev.hadoop.v2.intermediate.UserCategoryId;
 
 public class ReportByUserCategQuarterMapper extends Mapper<LongWritable, Text, UserCategoryId, ProductIdQuantityQuarter> {
 	static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static final int HEADER_LENGTH = 6;
+	//public static final int PRODUCTS_FILE_HEADER_LENGTH = 3;
+	
 	private HashMap<Integer, Integer> productToCategoryIdMap = new HashMap<Integer, Integer>();
 	
 	@Override
-	protected void setup(Context context) throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		super.setup(context);
+	public void setup(Context context) throws IOException, InterruptedException {
+		String productsFileName = MetadataProvider.METADATA_FILENAME_BASE+"_products";
+		
+		BufferedReader productsReader = new BufferedReader(new FileReader(productsFileName));
+
+		String line;
+		while ((line = productsReader.readLine()) != null) {
+			String[] tokens = line.split("\\t+");
+			/*if (tokens.length!=PRODUCTS_FILE_HEADER_LENGTH){
+				continue;
+			}*/
+			int productId = Integer.parseInt(tokens[0]);
+			int categoryid = Integer.parseInt(tokens[1]);
+			productToCategoryIdMap.put(productId, categoryid);
+		}
+
+		productsReader.close();
 	}
 
 
 	@Override
-	protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 		String []tokens = value.toString().split("\\t+");
 		
 		if (tokens.length != HEADER_LENGTH){

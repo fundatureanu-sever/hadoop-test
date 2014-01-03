@@ -36,6 +36,16 @@ public class ProductIdQuantityQuarter implements Writable{
 		out.writeByte(quarter);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof ProductIdQuantityQuarter)){
+			return false;
+		}
+		
+		ProductIdQuantityQuarter other = (ProductIdQuantityQuarter)obj;
+		return (prodId==other.prodId && quantity==other.quantity && quarter==other.quarter);
+	}
+
 	public int getProdId() {
 		return prodId;
 	}

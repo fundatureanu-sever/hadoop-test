@@ -54,7 +54,7 @@ public class UserCategoryId implements WritableComparable<UserCategoryId>{
 		}
 		
 		UserCategoryId other = (UserCategoryId)obj;
-		return (userId==other.userId && categoryId==other.userId);
+		return (userId==other.userId && categoryId==other.categoryId);
 	}
 
 	public int getUserId() {

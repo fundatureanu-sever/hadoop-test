@@ -1,5 +1,7 @@
 package dev.hadoop.v2;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +11,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
+import dev.hadoop.metadata.MetadataProvider;
 import dev.hadoop.v2.intermediate.DataByCatIdAndQuarter;
 
 
@@ -18,8 +21,20 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, DataByCatIdAndQu
 	
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		super.setup(context);
+		String categoryFileName = MetadataProvider.METADATA_FILENAME_BASE+"_categories";
+		
+		BufferedReader categoryReader = new BufferedReader(new FileReader(categoryFileName));
+
+		String line;
+		while ((line = categoryReader.readLine()) != null) {
+			String[] tokens = line.split("\\t");
+			
+			int categoryId = Integer.parseInt(tokens[0]);
+			String categoryName = tokens[1];
+			categoryMap.put(categoryId, categoryName);
+		}
+
+		categoryReader.close();
 	}
 
 
@@ -70,7 +85,6 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, DataByCatIdAndQu
 			categoryQuantityMap.put(categoryId, categorySum+quantity);
 		}
 	}
-
 
 	private String findMostPopularCategory(HashMap<Integer, Integer> categoryQuantities) {
 		int mostPopularCategId=-1, max=0;
