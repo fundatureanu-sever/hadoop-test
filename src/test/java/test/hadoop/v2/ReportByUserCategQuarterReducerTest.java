@@ -38,10 +38,11 @@ public class ReportByUserCategQuarterReducerTest {
 	}
 	
 	@Test
-	public void testExpectedInput_Reducer1() {
+	public void testExpectedInput_Reducer() {
 		ReportByUserCategQuarterReducer reducer = new ReportByUserCategQuarterReducer();
 		
 		try {
+			//Given
 			int userId = 1;
 			UserCategoryId uidCatId = new UserCategoryId(userId, 2);
 			
@@ -52,10 +53,12 @@ public class ReportByUserCategQuarterReducerTest {
 			values[3] = new ProductIdQuantityQuarter(4, 10, (byte)1);
 			values[4] = new ProductIdQuantityQuarter(9998, 10, (byte)3);
 			
+			//When
 			Context context = mock(Context.class);
 			reducer.setup(context);
 			reducer.reduce(uidCatId, Arrays.asList(values), context);
 			
+			//Then
 			DataByCatIdAndQuarter outValue1 = new DataByCatIdAndQuarter(2, (byte)0, 20, 17.5);
 			DataByCatIdAndQuarter outValue2 = new DataByCatIdAndQuarter(2, (byte)1, 20, 17.5);
 			DataByCatIdAndQuarter outValue3 = new DataByCatIdAndQuarter(2, (byte)2, 0, 0);

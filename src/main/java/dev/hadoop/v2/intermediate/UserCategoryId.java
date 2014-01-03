@@ -34,9 +34,9 @@ public class UserCategoryId implements WritableComparable<UserCategoryId>{
 
 	@Override
 	public int compareTo(UserCategoryId o) {
-		int c1 = userId-o.userId;
-		if (c1!=0){
-			return c1;
+		int userDiff = userId-o.userId;
+		if (userDiff!=0){
+			return userDiff;
 		}
 		
 		return (categoryId-o.categoryId);

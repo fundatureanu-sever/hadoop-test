@@ -38,12 +38,9 @@ public class ReportByUserIdReducerTest {
 	}
 	
 	@Test
-	public void testExpectedInput_Reducer2(){
+	public void testExpectedInput_Reducer(){
 		try {
-			ReportByUserIdReducer reducer = new ReportByUserIdReducer();
-			
-			Context context = mock(Context.class);
-			
+			//Given
 			IntWritable userId = new IntWritable(1);
 			
 			DataByCatIdAndQuarter []userInfo = new DataByCatIdAndQuarter[12];
@@ -62,9 +59,13 @@ public class ReportByUserIdReducerTest {
 			userInfo[10] = new DataByCatIdAndQuarter(2, (byte)2, 30, 70.0);
 			userInfo[11] = new DataByCatIdAndQuarter(2, (byte)3, 30, 10.0);
 			
+			//When
+			ReportByUserIdReducer reducer = new ReportByUserIdReducer();
+			Context context = mock(Context.class);
 			reducer.setup(context);
 			reducer.reduce(userId, Arrays.asList(userInfo), context);
 			
+			//Then
 			String expected = "1	Car accessories	80.0	60.0	110.0	60.0";
 			verify(context).write(NullWritable.get(), new Text(expected));
 			

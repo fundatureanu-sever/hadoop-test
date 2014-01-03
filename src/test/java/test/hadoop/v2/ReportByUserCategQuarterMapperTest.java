@@ -37,16 +37,18 @@ public class ReportByUserCategQuarterMapperTest {
 	}
 	
 	@Test
-	public void testExpectedInput_Mapper1(){
-		ReportByUserCategQuarterMapper mapper = new ReportByUserCategQuarterMapper();
-		
+	public void testExpectedInput_Mapper(){
 		try {
+			//Given
 			String inputLine = "2013-01-01	10000		1	1	1	10";
-			Context context = mock(Context.class);
 			
+			//When
+			Context context = mock(Context.class);
+			ReportByUserCategQuarterMapper mapper = new ReportByUserCategQuarterMapper();
 			mapper.setup(context);
 			mapper.map(new LongWritable(10), new Text(inputLine), context);
 			
+			//Then
 			UserCategoryId outKey = new UserCategoryId(1, 1);
 			ProductIdQuantityQuarter outValue = new ProductIdQuantityQuarter(1, 10, (byte)0);
 			verify(context).write(outKey, outValue);
@@ -60,18 +62,20 @@ public class ReportByUserCategQuarterMapperTest {
 	}
 	
 	@Test
-	public void testExpectedInput2Lines_Mapper1(){
-		ReportByUserCategQuarterMapper mapper = new ReportByUserCategQuarterMapper();
-		
+	public void testExpectedInput2Lines_Mapper(){
 		try {
+			//Given
 			String inputLine1 = "2013-01-01	10000		1	1	1	10";
 			String inputLine2 = "2013-04-01	10000		4	1	1	20";
-			Context context = mock(Context.class);
 			
+			//When
+			Context context = mock(Context.class);
+			ReportByUserCategQuarterMapper mapper = new ReportByUserCategQuarterMapper();
 			mapper.setup(context);
 			mapper.map(new LongWritable(10), new Text(inputLine1), context);
 			mapper.map(new LongWritable(10), new Text(inputLine2), context);
 			
+			//Then
 			UserCategoryId outKey1 = new UserCategoryId(1, 1);
 			ProductIdQuantityQuarter outValue1 = new ProductIdQuantityQuarter(1, 10, (byte)0);
 			verify(context).write(outKey1, outValue1);

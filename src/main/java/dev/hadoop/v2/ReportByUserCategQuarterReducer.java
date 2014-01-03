@@ -8,6 +8,9 @@ import java.util.HashMap;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
+import static dev.hadoop.constants.Constants.ESCAPED_TAB;
+import static dev.hadoop.constants.Constants.N_QUARTERS;
+
 import dev.hadoop.metadata.MetadataProvider;
 import dev.hadoop.v2.intermediate.DataByCatIdAndQuarter;
 import dev.hadoop.v2.intermediate.ProductIdQuantityQuarter;
@@ -25,7 +28,7 @@ public class ReportByUserCategQuarterReducer extends Reducer<UserCategoryId, Pro
 
 		String line;
 		while ((line = productsReader.readLine()) != null) {
-			String[] tokens = line.split("\\t");
+			String[] tokens = line.split(ESCAPED_TAB+"+");
 			
 			int productId = Integer.parseInt(tokens[0]);
 			double price = Double.parseDouble(tokens[2]);
@@ -37,8 +40,8 @@ public class ReportByUserCategQuarterReducer extends Reducer<UserCategoryId, Pro
 
 	@Override
 	public void reduce(UserCategoryId uidCatId, Iterable<ProductIdQuantityQuarter> values, Context context) throws IOException, InterruptedException {
-		int []quantityPerQuarter = new int[4];
-		double []revenuePerQuarter = new double[4];
+		int []quantityPerQuarter = new int[N_QUARTERS];
+		double []revenuePerQuarter = new double[N_QUARTERS];
 		
 		for (ProductIdQuantityQuarter productIdQuantityQuarter : values) {
 			

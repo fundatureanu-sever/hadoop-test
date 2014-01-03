@@ -14,6 +14,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
+import static dev.hadoop.constants.Constants.ESCAPED_TAB;
 import dev.hadoop.metadata.MetadataProvider;
 import dev.hadoop.v2.intermediate.ProductIdQuantityQuarter;
 import dev.hadoop.v2.intermediate.UserCategoryId;
@@ -21,7 +22,6 @@ import dev.hadoop.v2.intermediate.UserCategoryId;
 public class ReportByUserCategQuarterMapper extends Mapper<LongWritable, Text, UserCategoryId, ProductIdQuantityQuarter> {
 	static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static final int HEADER_LENGTH = 6;
-	//public static final int PRODUCTS_FILE_HEADER_LENGTH = 3;
 	
 	private HashMap<Integer, Integer> productToCategoryIdMap = new HashMap<Integer, Integer>();
 	
@@ -33,10 +33,8 @@ public class ReportByUserCategQuarterMapper extends Mapper<LongWritable, Text, U
 
 		String line;
 		while ((line = productsReader.readLine()) != null) {
-			String[] tokens = line.split("\\t+");
-			/*if (tokens.length!=PRODUCTS_FILE_HEADER_LENGTH){
-				continue;
-			}*/
+			String[] tokens = line.split(ESCAPED_TAB+"+");
+			
 			int productId = Integer.parseInt(tokens[0]);
 			int categoryid = Integer.parseInt(tokens[1]);
 			productToCategoryIdMap.put(productId, categoryid);
@@ -48,7 +46,7 @@ public class ReportByUserCategQuarterMapper extends Mapper<LongWritable, Text, U
 
 	@Override
 	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-		String []tokens = value.toString().split("\\t+");
+		String []tokens = value.toString().split(ESCAPED_TAB+"+");
 		
 		if (tokens.length != HEADER_LENGTH){
 			System.err.println("Log line at offset: "+key.get()+" has "+tokens.length+" elements instead of "+HEADER_LENGTH);

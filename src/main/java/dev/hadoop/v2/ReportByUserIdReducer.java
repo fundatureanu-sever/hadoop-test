@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static dev.hadoop.constants.Constants.ESCAPED_TAB;
+import static dev.hadoop.constants.Constants.TAB;
+import static dev.hadoop.constants.Constants.DASH;
+import static dev.hadoop.constants.Constants.N_QUARTERS;
+
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -27,7 +32,7 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, DataByCatIdAndQu
 
 		String line;
 		while ((line = categoryReader.readLine()) != null) {
-			String[] tokens = line.split("\\t");
+			String[] tokens = line.split(ESCAPED_TAB);
 			
 			int categoryId = Integer.parseInt(tokens[0]);
 			String categoryName = tokens[1];
@@ -41,7 +46,7 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, DataByCatIdAndQu
 	@Override
 	public void reduce(IntWritable userId, Iterable<DataByCatIdAndQuarter> values, Context context) throws IOException, InterruptedException {
 		HashMap<Integer, Integer> categoryQuantityMap = new HashMap<Integer, Integer>(categoryMap.size());
-		double[] totalRevenuePerQuarter = new double[4];
+		double[] totalRevenuePerQuarter = new double[N_QUARTERS];
 		
 		for (DataByCatIdAndQuarter dataByCatIdAndQuarter : values) {
 			updateCategoryQuantityMap(categoryQuantityMap, dataByCatIdAndQuarter);
@@ -57,12 +62,12 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, DataByCatIdAndQu
 
 	private String buildOutputLine(IntWritable userId, double[] totalRevenuePerQuarter, String mostPopularCategoryName) {
 		StringBuilder outputLine = new StringBuilder(userId.get()+"");
-		outputLine.append("\t");
+		outputLine.append(TAB);
 		outputLine.append(mostPopularCategoryName);
 		for (int i = 0; i < totalRevenuePerQuarter.length; i++) {
-			outputLine.append("\t");
+			outputLine.append(TAB);
 			if (totalRevenuePerQuarter[i]==0){
-				outputLine.append("-");
+				outputLine.append(DASH);
 			}
 			else{
 				outputLine.append(totalRevenuePerQuarter[i]);
@@ -100,7 +105,7 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, DataByCatIdAndQu
 			mostPopularCategoryName = categoryMap.get(mostPopularCategId);
 		}
 		else{
-			mostPopularCategoryName = "-";
+			mostPopularCategoryName = DASH;
 		}
 		return mostPopularCategoryName;
 	}
