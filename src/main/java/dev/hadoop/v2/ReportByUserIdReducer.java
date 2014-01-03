@@ -20,7 +20,7 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, DataByCatIdAndQu
 	private HashMap<Integer, String> categoryMap = new HashMap<Integer, String>();
 	
 	@Override
-	protected void setup(Context context) throws IOException, InterruptedException {
+	public void setup(Context context) throws IOException, InterruptedException {
 		String categoryFileName = MetadataProvider.METADATA_FILENAME_BASE+"_categories";
 		
 		BufferedReader categoryReader = new BufferedReader(new FileReader(categoryFileName));
@@ -39,7 +39,7 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, DataByCatIdAndQu
 
 
 	@Override
-	protected void reduce(IntWritable userId, Iterable<DataByCatIdAndQuarter> values, Context context) throws IOException, InterruptedException {
+	public void reduce(IntWritable userId, Iterable<DataByCatIdAndQuarter> values, Context context) throws IOException, InterruptedException {
 		HashMap<Integer, Integer> categoryQuantityMap = new HashMap<Integer, Integer>(categoryMap.size());
 		double[] totalRevenuePerQuarter = new double[4];
 		

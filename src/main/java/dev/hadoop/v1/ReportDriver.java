@@ -50,9 +50,8 @@ public class ReportDriver extends Configured implements Tool {
 		
 		//TODO optimize parameters here
 		
-		try {
-			Job j;
-			j = new Job(conf);
+		try {		
+			Job j = new Job(conf);
 			j.setJobName("ReportByUserID");
 			
 			j.setMapperClass(ReportByUserIdMapper.class);
@@ -72,7 +71,7 @@ public class ReportDriver extends Configured implements Tool {
 			//TODO setup partitioner
 			
 			TextInputFormat.setInputPaths(j, new Path(args[1]));
-			TextOutputFormat.setOutputPath(j, new Path(args[2]));
+			TextOutputFormat.setOutputPath(j, new Path(args[2]));		
 			
 			MetadataProvider metadataProvider = new JDBCMetadataProvider();
 			String[] metadataFileURIs = metadataProvider.generateMetadata();

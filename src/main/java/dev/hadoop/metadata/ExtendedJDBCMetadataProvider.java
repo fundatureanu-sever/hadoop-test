@@ -27,7 +27,7 @@ public class ExtendedJDBCMetadataProvider extends AbstractJDBCMetadataProvider {
 			if (categoryId==null){
 				categoryId = categoryIdCounter++;
 				categoryMap.put(categoryName, categoryId);
-				categoriesWriter.write(categoryId+"\t"+categoryName);
+				categoriesWriter.write(categoryId+"\t"+categoryName+"\n");
 			}
 			
 			productsWriter.write(categoryId+"\t");			
