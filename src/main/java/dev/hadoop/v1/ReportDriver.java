@@ -75,8 +75,8 @@ public class ReportDriver extends Configured implements Tool {
 			TextOutputFormat.setOutputPath(j, new Path(args[2]));
 			
 			MetadataProvider metadataProvider = new JDBCMetadataProvider();
-			String metadataFileURI = metadataProvider.generateMetadata();
-			DistributedCache.addCacheFile(new URI(metadataFileURI), conf);
+			String[] metadataFileURIs = metadataProvider.generateMetadata();
+			DistributedCache.addCacheFile(new URI(metadataFileURIs[0]), conf);
 			DistributedCache.createSymlink(conf);
 			
 			j.waitForCompletion(true);
