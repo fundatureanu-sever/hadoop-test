@@ -9,9 +9,10 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import dev.hadoop.v2.IntermData.DataByCatIdAndQuarter;
+import dev.hadoop.v2.intermediate.DataByCatIdAndQuarter;
 
-public class ReportByUserIdReducer extends Reducer<IntWritable, IntermData.DataByCatIdAndQuarter, NullWritable, Text> {
+
+public class ReportByUserIdReducer extends Reducer<IntWritable, DataByCatIdAndQuarter, NullWritable, Text> {
 
 	private HashMap<Integer, String> categoryMap = new HashMap<Integer, String>();
 	
@@ -30,7 +31,7 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, IntermData.DataB
 		for (DataByCatIdAndQuarter dataByCatIdAndQuarter : values) {
 			updateCategoryQuantityMap(categoryQuantityMap, dataByCatIdAndQuarter);
 			
-			totalRevenuePerQuarter[dataByCatIdAndQuarter.quarter] += dataByCatIdAndQuarter.revenue;		
+			totalRevenuePerQuarter[dataByCatIdAndQuarter.getQuarter()] += dataByCatIdAndQuarter.getRevenue();		
 		}
 		
 		String mostPopularCategoryName = findMostPopularCategory(categoryQuantityMap);
@@ -58,8 +59,8 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, IntermData.DataB
 
 
 	private void updateCategoryQuantityMap(HashMap<Integer, Integer> categoryQuantityMap, DataByCatIdAndQuarter dataByCatIdAndQuarter) {
-		int categoryId = dataByCatIdAndQuarter.categoryId;
-		int quantity = dataByCatIdAndQuarter.quantity;
+		int categoryId = dataByCatIdAndQuarter.getCategoryId();
+		int quantity = dataByCatIdAndQuarter.getQuantity();
 		
 		Integer categorySum = categoryQuantityMap.get(categoryId);
 		if (categorySum==null){

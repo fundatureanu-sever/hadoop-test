@@ -6,10 +6,11 @@ import java.util.HashMap;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import dev.hadoop.v2.IntermData.ProductIdQuantityQuarter;
-import dev.hadoop.v2.IntermData.UIDCatId;
+import dev.hadoop.v2.intermediate.DataByCatIdAndQuarter;
+import dev.hadoop.v2.intermediate.ProductIdQuantityQuarter;
+import dev.hadoop.v2.intermediate.UserCategoryId;
 
-public class ReportByUserCategQuarterReducer extends Reducer< IntermData.UIDCatId, IntermData.ProductIdQuantityQuarter, IntWritable, IntermData.DataByCatIdAndQuarter> {
+public class ReportByUserCategQuarterReducer extends Reducer< UserCategoryId, ProductIdQuantityQuarter, IntWritable, DataByCatIdAndQuarter> {
 	
 	private HashMap<Integer, Double> productIdToPriceMap = new HashMap<Integer, Double>();
 	
@@ -22,25 +23,27 @@ public class ReportByUserCategQuarterReducer extends Reducer< IntermData.UIDCatI
 
 
 	@Override
-	protected void reduce(UIDCatId uidCatId, Iterable<ProductIdQuantityQuarter> values, Context context) throws IOException, InterruptedException {
+	protected void reduce(UserCategoryId uidCatId, Iterable<ProductIdQuantityQuarter> values, Context context) throws IOException, InterruptedException {
 		int []quantityPerQuarter = new int[4];
 		double []revenuePerQuarter = new double[4];
 		
 		for (ProductIdQuantityQuarter productIdQuantityQuarter : values) {
 			
-			Double price = productIdToPriceMap.get(productIdQuantityQuarter.prodId);
+			Double price = productIdToPriceMap.get(productIdQuantityQuarter.getProdId());
 			if (price == null){
-				System.err.println("No price found for product "+productIdQuantityQuarter.prodId+" ; not including it in the total");
+				System.err.println("No price found for product "+productIdQuantityQuarter.getProdId()+" ; not including it in the total");
 				continue;
 			}
 			
-			quantityPerQuarter[productIdQuantityQuarter.quarter] += productIdQuantityQuarter.quantity;
-			revenuePerQuarter[productIdQuantityQuarter.quarter] += price*productIdQuantityQuarter.quantity;
+			int quantity = productIdQuantityQuarter.getQuantity();
+			byte quarter = productIdQuantityQuarter.getQuarter();
+			quantityPerQuarter[quarter] += quantity;
+			revenuePerQuarter[quarter] += price*quantity;
 		}
 		
 		for (int i = 0; i < revenuePerQuarter.length; i++) {
-			IntermData.DataByCatIdAndQuarter outValue = new IntermData.DataByCatIdAndQuarter(uidCatId.categoryId, (byte)i, quantityPerQuarter[i], revenuePerQuarter[i]);
-			context.write(new IntWritable(uidCatId.userId), outValue);
+			DataByCatIdAndQuarter outValue = new DataByCatIdAndQuarter(uidCatId.getCategoryId(), (byte)i, quantityPerQuarter[i], revenuePerQuarter[i]);
+			context.write(new IntWritable(uidCatId.getUserId()), outValue);
 		}
 	}
 	

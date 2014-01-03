@@ -12,7 +12,10 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class ReportByUserCategQuarterMapper extends Mapper<LongWritable, Text, IntermData.UIDCatId, IntermData.ProductIdQuantityQuarter> {
+import dev.hadoop.v2.intermediate.ProductIdQuantityQuarter;
+import dev.hadoop.v2.intermediate.UserCategoryId;
+
+public class ReportByUserCategQuarterMapper extends Mapper<LongWritable, Text, UserCategoryId, ProductIdQuantityQuarter> {
 	static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static final int HEADER_LENGTH = 6;
 	private HashMap<Integer, Integer> productToCategoryIdMap = new HashMap<Integer, Integer>();
@@ -43,8 +46,8 @@ public class ReportByUserCategQuarterMapper extends Mapper<LongWritable, Text, I
 			int userId = Integer.parseInt(tokens[3]);
 			int quantity = Integer.parseInt(tokens[5]);
 			
-			IntermData.UIDCatId outKey = new IntermData.UIDCatId(userId, productToCategoryIdMap.get(productId));
-			IntermData.ProductIdQuantityQuarter outValue = new IntermData.ProductIdQuantityQuarter(productId, quantity, quarter);
+			UserCategoryId outKey = new UserCategoryId(userId, productToCategoryIdMap.get(productId));
+			ProductIdQuantityQuarter outValue = new ProductIdQuantityQuarter(productId, quantity, quarter);
 			context.write(outKey, outValue);
 			
 		} catch (ParseException e) {
