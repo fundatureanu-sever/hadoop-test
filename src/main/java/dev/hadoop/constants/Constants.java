@@ -27,9 +27,9 @@ public class Constants {
 	public static final int QUANTITY_OFFSET = 5;
 	
 	//metadata column indexes
-	public static final int PRODUCT_ID = 0;
-	public static final int PRODUCT_NAME = 1;
-	public static final int CATEGORY_NAME = 2;
-	public static final int PRICE = 3;
+	public static final int PRODUCT_ID_COL = 1;
+	public static final int PRODUCT_NAME_COL = 2;
+	public static final int CATEGORY_NAME_COL = 3;
+	public static final int PRICE_COL = 4;
 	
 }

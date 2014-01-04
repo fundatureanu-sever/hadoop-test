@@ -8,6 +8,10 @@ import java.sql.SQLException;
 import static dev.hadoop.constants.Constants.TAB;
 import static dev.hadoop.constants.Constants.EOL;
 
+import static dev.hadoop.constants.Constants.PRODUCT_ID_COL;
+import static dev.hadoop.constants.Constants.CATEGORY_NAME_COL;
+import static dev.hadoop.constants.Constants.PRICE_COL;
+
 public class JDBCMetadataProvider extends AbstractJDBCMetadataProvider {
 	
 	protected String [] processResults(ResultSet results) throws IOException, SQLException {

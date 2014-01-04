@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import static dev.hadoop.constants.Constants.TAB;
 import static dev.hadoop.constants.Constants.EOL;
+import static dev.hadoop.constants.Constants.PRICE_COL;
+import static dev.hadoop.constants.Constants.CATEGORY_NAME_COL;
+import static dev.hadoop.constants.Constants.PRODUCT_ID_COL;
 
 public class ExtendedJDBCMetadataProvider extends AbstractJDBCMetadataProvider {
 

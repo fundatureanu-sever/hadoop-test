@@ -8,10 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public abstract class AbstractJDBCMetadataProvider implements MetadataProvider {
-
-	protected static final int PRICE_COL = 4;
-	protected static final int CATEGORY_NAME_COL = 3;
-	protected static final int PRODUCT_ID_COL = 1;
 	
 	//connection details
 	public static final String JDBC_HOST = "localhost";
