@@ -150,15 +150,8 @@ public class ReportDriver extends Configured implements Tool{
 		SequenceFileInputFormat.setInputPaths(j, inputPath);
 		TextOutputFormat.setOutputPath(j, new Path(outputPath));
 		
-		j.setPartitionerClass(TotalOrderPartitioner.class);
-		InputSampler.Sampler<IntWritable, DataByCatIdAndQuarter> sampler = new InputSampler.RandomSampler<IntWritable, DataByCatIdAndQuarter>(0.1, 1000, 20);
+		configurePartitioner(conf, j, inputPath);	
 		
-		Path partitionFile = new Path(inputPath, "_partitions");
-		TotalOrderPartitioner.setPartitionFile(conf, partitionFile);
-		InputSampler.writePartitionFile(j, sampler);
-		
-		URI partitionURI = new URI(partitionFile.toString()+"#_partitions");
-		DistributedCache.addCacheFile(partitionURI, conf);	
 		for (int i = 0; i < metadataFileURIs.length; i++) {
 			DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
 		}		
@@ -167,6 +160,18 @@ public class ReportDriver extends Configured implements Tool{
 		j.setNumReduceTasks((int)(numberOfNodes*1.75));
 		
 		return j;
+	}
+
+	private void configurePartitioner(Configuration conf, Job j, Path inputPath) throws IOException, ClassNotFoundException, InterruptedException, URISyntaxException {
+		j.setPartitionerClass(TotalOrderPartitioner.class);
+		InputSampler.Sampler<IntWritable, DataByCatIdAndQuarter> sampler = new InputSampler.RandomSampler<IntWritable, DataByCatIdAndQuarter>(0.1, 1000, 20);
+		
+		Path partitionFile = new Path(inputPath, "_partitions");
+		TotalOrderPartitioner.setPartitionFile(conf, partitionFile);
+		InputSampler.writePartitionFile(j, sampler);
+		
+		URI partitionURI = new URI(partitionFile.toString()+"#_partitions");
+		DistributedCache.addCacheFile(partitionURI, conf);
 	}
 
 	private void configureShuffle(Configuration conf, ShuffleStageOptimizer shuffleOptimizer) {

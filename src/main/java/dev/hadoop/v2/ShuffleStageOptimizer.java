@@ -36,7 +36,6 @@ public class ShuffleStageOptimizer {
 		ioSortMetaBufferSize = inputRecordsPerSplit*META_BUFFER_UNIT_SIZE*inToOutCardinality;
 		totalIoSortSizeBytes = ioSortMetaBufferSize+ioSortSerializationBufferSize;
 		totalIoSortSizeMB = (int)(((double)totalIoSortSizeBytes)/1024/1024);
-		
 	}
 
 	public int getIoSortMB() {
@@ -55,4 +54,8 @@ public class ShuffleStageOptimizer {
 		return totalIoSortSizeMB/10+1;
 	}
 	
+	public String toString(){
+		String ret = "totalIoSortSizeMB "+totalIoSortSizeMB;
+		return ret;
+	}
 }
