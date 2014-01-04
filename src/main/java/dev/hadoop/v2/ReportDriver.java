@@ -7,11 +7,9 @@ import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -24,6 +22,7 @@ import org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import dev.hadoop.constants.Constants;
 import dev.hadoop.metadata.ExtendedJDBCMetadataProvider;
 import dev.hadoop.metadata.MetadataProvider;
 import dev.hadoop.v2.intermediate.DataByCatIdAndQuarter;
@@ -76,6 +75,19 @@ public class ReportDriver extends Configured implements Tool{
 
 	private Job createFirstJob(int numberOfNodes, String inputPath, String outputPath, String []metadataFileURIs) throws IOException, URISyntaxException{
 		Configuration conf = new Configuration(getConf());
+		
+		conf.setBoolean("mapred.compress.map.output", true);
+		
+		//estimating the size of an input line in text
+		int inputRecordSize = 10+5+5+5+5+6+10;//date+order_id+prod_id+user_id+actMngr_id+quantity+N_tabs
+		
+		//estimating the size of an map output record in bytes 
+		int mapOutputRecordSize = (4+4)+(4+4+1);//key(UserId+CategoryId)+value(ProductId+Quantity+Quarter)
+				
+		ShuffleStageOptimizer shuffleOptimizer = new ShuffleStageOptimizer(Constants.INPUT_SPLIT_SIZE,
+													inputRecordSize, mapOutputRecordSize, 1);
+		configureShuffle(conf, shuffleOptimizer);
+		
 		Job j = new Job(conf);
 		j.setJobName("ReportByUserIDCategoryQuarter");
 		
@@ -96,8 +108,6 @@ public class ReportDriver extends Configured implements Tool{
 		
 		j.setNumReduceTasks((int)(numberOfNodes*1.75));
 		
-		//TODO setup partitioner
-		
 		for (int i = 0; i < metadataFileURIs.length; i++) {
 			DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
 		}		
@@ -108,6 +118,18 @@ public class ReportDriver extends Configured implements Tool{
 	
 	private Job createSecondJob(int numberOfNodes, String inputPathString, String outputPath, String[] metadataFileURIs) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException{
 		Configuration conf = new Configuration(getConf());
+		
+		conf.setBoolean("mapred.compress.map.output", true);
+		
+		//estimating the size of an input line in text
+		int inputRecordSize = (4+4+1)+(4+8);//key(userId+categId+Quarter)+value(quantity+revenue)
+				
+		//estimating the size of an map output record in bytes 
+		int mapOutputRecordSize = 4+(4+1+4+8);//key(userId+categId+Quarter)+value(quantity+revenue)
+					
+		ShuffleStageOptimizer shuffleOptimizer = new ShuffleStageOptimizer(Constants.INPUT_SPLIT_SIZE,
+													inputRecordSize, mapOutputRecordSize, 1);
+		configureShuffle(conf, shuffleOptimizer);
 		
 		Job j = new Job(conf);
 		j.setJobName("ReportByUserID");
@@ -147,8 +169,12 @@ public class ReportDriver extends Configured implements Tool{
 		return j;
 	}
 
+	private void configureShuffle(Configuration conf, ShuffleStageOptimizer shuffleOptimizer) {
+		conf.setInt("io.sort.mb", shuffleOptimizer.getIoSortMB());
+		conf.setFloat("io.sort.spill.percent", shuffleOptimizer.getIoSortSpillThreshold());
+		conf.setFloat("io.sort.record.percent", shuffleOptimizer.getIoSortRecordPercent());
+		conf.setInt("io.sort.factor", shuffleOptimizer.getIoSortFactor());
+		conf.setFloat("mapred.job.reduce.input.buffer.percent", ShuffleStageOptimizer.REDUCE_BUFFER_PERCENT);
+	}
 	
-
-	
-
 }
