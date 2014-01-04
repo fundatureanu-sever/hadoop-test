@@ -7,9 +7,11 @@ import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -17,6 +19,8 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.mapreduce.lib.partition.InputSampler;
+import org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -102,8 +106,9 @@ public class ReportDriver extends Configured implements Tool{
 		return j;
 	}
 	
-	private Job createSecondJob(int numberOfNodes, String inputPath, String outputPath, String[] metadataFileURIs) throws IOException, URISyntaxException{
+	private Job createSecondJob(int numberOfNodes, String inputPathString, String outputPath, String[] metadataFileURIs) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException{
 		Configuration conf = new Configuration(getConf());
+		
 		Job j = new Job(conf);
 		j.setJobName("ReportByUserID");
 		
@@ -119,18 +124,30 @@ public class ReportDriver extends Configured implements Tool{
 		j.setInputFormatClass(SequenceFileInputFormat.class);
 		j.setOutputFormatClass(TextOutputFormat.class);
 		
-		SequenceFileInputFormat.setInputPaths(j, new Path(inputPath));
+		Path inputPath = new Path(inputPathString);
+		SequenceFileInputFormat.setInputPaths(j, inputPath);
 		TextOutputFormat.setOutputPath(j, new Path(outputPath));
 		
-		j.setNumReduceTasks((int)(numberOfNodes*1.75));
+		j.setPartitionerClass(TotalOrderPartitioner.class);
+		InputSampler.Sampler<IntWritable, DataByCatIdAndQuarter> sampler = new InputSampler.RandomSampler<IntWritable, DataByCatIdAndQuarter>(0.1, 1000, 20);
 		
+		Path partitionFile = new Path(inputPath, "_partitions");
+		TotalOrderPartitioner.setPartitionFile(conf, partitionFile);
+		InputSampler.writePartitionFile(j, sampler);
+		
+		URI partitionURI = new URI(partitionFile.toString()+"#_partitions");
+		DistributedCache.addCacheFile(partitionURI, conf);	
 		for (int i = 0; i < metadataFileURIs.length; i++) {
 			DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
 		}		
 		DistributedCache.createSymlink(conf);
 		
+		j.setNumReduceTasks((int)(numberOfNodes*1.75));
+		
 		return j;
 	}
+
+	
 
 	
 
