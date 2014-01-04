@@ -37,9 +37,9 @@ public class ReportDriver extends Configured implements Tool{
 	 */
 	public static void main(String[] args) {
 		try {
-			if (args.length != 4){
+			if (args.length != 3){
 				System.err.println("Unexpected number of arguments");
-				System.out.println("Usage: dev.hadoop.ReportDriver <N_slave_nodes> <local/distributed> <input_path> <output_path>");
+				System.out.println("Usage: dev.hadoop.ReportDriver <N_slave_nodes> <input_path> <output_path>");
 				return;
 			}
 			
@@ -68,13 +68,13 @@ public class ReportDriver extends Configured implements Tool{
 		System.out.println("Starting first job ..");
 		
 		String tempDirectory = "tempDir";
-		Job j1 = createFirstJob(numberOfNodes, args[2], tempDirectory, isLocal, metadataFileURIs);
+		Job j1 = createFirstJob(numberOfNodes, args[1], tempDirectory, metadataFileURIs);
 		j1.waitForCompletion(true);
 		
 		System.out.println("First job finished");
 		System.out.println("Starting second job ..");
 		
-		Job j2 = createSecondJob(numberOfNodes, tempDirectory, args[3], isLocal, metadataFileURIs);
+		Job j2 = createSecondJob(numberOfNodes, tempDirectory, args[2], metadataFileURIs);
 		j2.waitForCompletion(true);
 		
 		System.out.println("Second job finished");
@@ -82,7 +82,7 @@ public class ReportDriver extends Configured implements Tool{
 		return 0;
 	}
 
-	private Job createFirstJob(int numberOfNodes, String inputPath, String outputPath, boolean isLocal, String []metadataFileURIs) throws IOException, URISyntaxException{
+	private Job createFirstJob(int numberOfNodes, String inputPath, String outputPath, String []metadataFileURIs) throws IOException, URISyntaxException{
 		Configuration conf = new Configuration(getConf());
 		
 		conf.setBoolean("mapred.compress.map.output", true);
@@ -97,7 +97,7 @@ public class ReportDriver extends Configured implements Tool{
 													inputRecordSize, mapOutputRecordSize, 1);
 		configureShuffle(conf, shuffleOptimizer);
 		
-		if (!isLocal) {
+		if (numberOfNodes!=0) {
 			FileSystem fs = FileSystem.get(conf);
 			for (int i = 0; i < metadataFileURIs.length; i++) {
 				String fileName = metadataFileURIs[i].split("#")[0];
@@ -126,12 +126,13 @@ public class ReportDriver extends Configured implements Tool{
 		TextInputFormat.setInputPaths(j, new Path(inputPath));
 		SequenceFileOutputFormat.setOutputPath(j, new Path(outputPath));
 		
-		j.setNumReduceTasks((int)(numberOfNodes*1.75));
+		int nReducers = (int)(numberOfNodes*1.75);
+		j.setNumReduceTasks(nReducers > 0 ? nReducers : 1);
 			
 		return j;
 	}
 	
-	private Job createSecondJob(int numberOfNodes, String inputPathString, String outputPath, boolean isLocal, String[] metadataFileURIs) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException{
+	private Job createSecondJob(int numberOfNodes, String inputPathString, String outputPath, String[] metadataFileURIs) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException{
 		Configuration conf = new Configuration(getConf());
 		
 		conf.setBoolean("mapred.compress.map.output", true);
@@ -146,7 +147,7 @@ public class ReportDriver extends Configured implements Tool{
 													inputRecordSize, mapOutputRecordSize, 1);
 		configureShuffle(conf, shuffleOptimizer);
 		
-		if (!isLocal){
+		if (numberOfNodes!=0){
 			for (int i = 0; i < metadataFileURIs.length; i++) {
 				DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
 			}		
@@ -156,7 +157,7 @@ public class ReportDriver extends Configured implements Tool{
 		Job j = new Job(conf);
 		j.setJobName("ReportByUserID");
 		
-		//j.setJarByClass(ReportDriver.class);
+		j.setJarByClass(ReportDriver.class);
 		j.setMapperClass(Mapper.class);
 		j.setReducerClass(ReportByUserIdReducer.class);
 		
@@ -175,7 +176,8 @@ public class ReportDriver extends Configured implements Tool{
 		
 		//configurePartitioner(conf, j, inputPath);	
 		
-		j.setNumReduceTasks((int)(numberOfNodes*1.75));
+		int nReducers = (int)(numberOfNodes*1.75);
+		j.setNumReduceTasks(nReducers > 0 ? nReducers : 1);
 		
 		return j;
 	}
