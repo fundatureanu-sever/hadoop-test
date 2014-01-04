@@ -29,7 +29,7 @@ public class ReportByUserIdReducerTest {
 	@Before
 	public void prepareTests(){		
 		try {
-			FileWriter categoryWriter = new FileWriter(MetadataProvider.METADATA_FILENAME_BASE+"_categories");
+			FileWriter categoryWriter = new FileWriter("categories");
 			
 			categoryWriter.write("0	Fruit\n");
 			categoryWriter.write("1	Decoration\n");

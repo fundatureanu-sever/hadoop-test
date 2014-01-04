@@ -37,9 +37,9 @@ public class ReportDriver extends Configured implements Tool{
 	 */
 	public static void main(String[] args) {
 		try {
-			if (args.length != 3){
+			if (args.length != 4){
 				System.err.println("Unexpected number of arguments");
-				System.out.println("Usage: dev.hadoop.ReportDriver <N_slave_nodes> <input_path> <output_path>");
+				System.out.println("Usage: dev.hadoop.ReportDriver <N_slave_nodes> <local/distributed> <input_path> <output_path>");
 				return;
 			}
 			
@@ -53,6 +53,14 @@ public class ReportDriver extends Configured implements Tool{
 	@Override
 	public int run(String[] args) throws Exception {
 		int numberOfNodes = Integer.parseInt(args[0]);
+		boolean isLocal;
+		if (args[1].equals("local")){
+			isLocal = true;
+		}
+		else{
+			isLocal = false;
+		}
+		
 		
 		MetadataProvider metadataProvider = new ExtendedJDBCMetadataProvider();
 		String[] metadataFileURIs = metadataProvider.generateMetadata();
@@ -60,13 +68,13 @@ public class ReportDriver extends Configured implements Tool{
 		System.out.println("Starting first job ..");
 		
 		String tempDirectory = "tempDir";
-		Job j1 = createFirstJob(numberOfNodes, args[1], tempDirectory, metadataFileURIs);
+		Job j1 = createFirstJob(numberOfNodes, args[2], tempDirectory, isLocal, metadataFileURIs);
 		j1.waitForCompletion(true);
 		
 		System.out.println("First job finished");
 		System.out.println("Starting second job ..");
 		
-		Job j2 = createSecondJob(numberOfNodes, tempDirectory, args[2], metadataFileURIs);
+		Job j2 = createSecondJob(numberOfNodes, tempDirectory, args[3], isLocal, metadataFileURIs);
 		j2.waitForCompletion(true);
 		
 		System.out.println("Second job finished");
@@ -74,7 +82,7 @@ public class ReportDriver extends Configured implements Tool{
 		return 0;
 	}
 
-	private Job createFirstJob(int numberOfNodes, String inputPath, String outputPath, String []metadataFileURIs) throws IOException, URISyntaxException{
+	private Job createFirstJob(int numberOfNodes, String inputPath, String outputPath, boolean isLocal, String []metadataFileURIs) throws IOException, URISyntaxException{
 		Configuration conf = new Configuration(getConf());
 		
 		conf.setBoolean("mapred.compress.map.output", true);
@@ -89,13 +97,15 @@ public class ReportDriver extends Configured implements Tool{
 													inputRecordSize, mapOutputRecordSize, 1);
 		configureShuffle(conf, shuffleOptimizer);
 		
-		FileSystem fs = FileSystem.get(conf);
-		for (int i = 0; i < metadataFileURIs.length; i++) {
-			System.out.println(metadataFileURIs[i]);
-			fs.copyFromLocalFile(new Path(metadataFileURIs[i].split("#")[0]), new Path(metadataFileURIs[i]));
-			DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
-		}		
-		DistributedCache.createSymlink(conf);
+		if (!isLocal) {
+			FileSystem fs = FileSystem.get(conf);
+			for (int i = 0; i < metadataFileURIs.length; i++) {
+				String fileName = metadataFileURIs[i].split("#")[0];
+				fs.copyFromLocalFile(new Path(fileName), new Path(fileName));
+				DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
+			}
+			DistributedCache.createSymlink(conf);
+		}
 		
 		Job j = new Job(conf);
 		j.setJobName("ReportByUserIDCategoryQuarter");
@@ -117,12 +127,11 @@ public class ReportDriver extends Configured implements Tool{
 		SequenceFileOutputFormat.setOutputPath(j, new Path(outputPath));
 		
 		j.setNumReduceTasks((int)(numberOfNodes*1.75));
-		
-		
+			
 		return j;
 	}
 	
-	private Job createSecondJob(int numberOfNodes, String inputPathString, String outputPath, String[] metadataFileURIs) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException{
+	private Job createSecondJob(int numberOfNodes, String inputPathString, String outputPath, boolean isLocal, String[] metadataFileURIs) throws IOException, URISyntaxException, ClassNotFoundException, InterruptedException{
 		Configuration conf = new Configuration(getConf());
 		
 		conf.setBoolean("mapred.compress.map.output", true);
@@ -137,18 +146,17 @@ public class ReportDriver extends Configured implements Tool{
 													inputRecordSize, mapOutputRecordSize, 1);
 		configureShuffle(conf, shuffleOptimizer);
 		
-		//FileSystem fs = FileSystem.get(conf);
-		for (int i = 0; i < metadataFileURIs.length; i++) {
-			System.out.println(metadataFileURIs[i]);
-			//fs.copyFromLocalFile(new Path(metadataFileURIs[i].split("#")[0]), new Path(metadataFileURIs[i]));
-			DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
-		}		
-		DistributedCache.createSymlink(conf);
+		if (!isLocal){
+			for (int i = 0; i < metadataFileURIs.length; i++) {
+				DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
+			}		
+			DistributedCache.createSymlink(conf);
+		}
 		
 		Job j = new Job(conf);
 		j.setJobName("ReportByUserID");
 		
-		j.setJarByClass(ReportDriver.class);
+		//j.setJarByClass(ReportDriver.class);
 		j.setMapperClass(Mapper.class);
 		j.setReducerClass(ReportByUserIdReducer.class);
 		
@@ -165,7 +173,7 @@ public class ReportDriver extends Configured implements Tool{
 		SequenceFileInputFormat.setInputPaths(j, inputPath);
 		TextOutputFormat.setOutputPath(j, new Path(outputPath));
 		
-		configurePartitioner(conf, j, inputPath);	
+		//configurePartitioner(conf, j, inputPath);	
 		
 		j.setNumReduceTasks((int)(numberOfNodes*1.75));
 		
@@ -174,14 +182,14 @@ public class ReportDriver extends Configured implements Tool{
 
 	private void configurePartitioner(Configuration conf, Job j, Path inputPath) throws IOException, ClassNotFoundException, InterruptedException, URISyntaxException {
 		j.setPartitionerClass(TotalOrderPartitioner.class);
-		InputSampler.Sampler<IntWritable, DataByCatIdAndQuarter> sampler = new InputSampler.RandomSampler<IntWritable, DataByCatIdAndQuarter>(0.1, 1000, 20);
+		InputSampler.Sampler<IntWritable, Text> sampler = new InputSampler.RandomSampler<IntWritable, Text>(0.1, 1000, 20);
 		
-		Path partitionFile = new Path(inputPath, "_partitions");
-		TotalOrderPartitioner.setPartitionFile(conf, partitionFile);
+		Path partitionFile = new Path("_partition.lst");
+		TotalOrderPartitioner.setPartitionFile(j.getConfiguration(), partitionFile);
 		InputSampler.writePartitionFile(j, sampler);
 		
-		URI partitionURI = new URI(partitionFile.toString()+"#_partitions");
-		DistributedCache.addCacheFile(partitionURI, conf);
+		URI partitionURI = new URI(partitionFile.toString()+"#_partition");
+		DistributedCache.addCacheFile(partitionURI, j.getConfiguration());
 	}
 
 	private void configureShuffle(Configuration conf, ShuffleStageOptimizer shuffleOptimizer) {

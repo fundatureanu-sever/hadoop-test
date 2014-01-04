@@ -24,7 +24,7 @@ public class ReportByUserCategQuarterMapperTest {
 	@Before
 	public void prepareTests(){		
 		try {
-			FileWriter productsWriter = new FileWriter(MetadataProvider.METADATA_FILENAME_BASE+"_products");
+			FileWriter productsWriter = new FileWriter("products");
 			
 			productsWriter.write("1	1	1.00\n");
 			productsWriter.write("2	1	0.75\n");
