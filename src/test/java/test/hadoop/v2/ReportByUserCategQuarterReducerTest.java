@@ -18,7 +18,14 @@ import dev.hadoop.v2.intermediate.DataByCatIdAndQuarter;
 import dev.hadoop.v2.intermediate.ProductIdQuantityQuarter;
 import dev.hadoop.v2.intermediate.UserCategoryId;
 
+import static dev.hadoop.constants.Constants.Q1;
+import static dev.hadoop.constants.Constants.Q2;
+import static dev.hadoop.constants.Constants.Q3;
+import static dev.hadoop.constants.Constants.Q4;
+
 public class ReportByUserCategQuarterReducerTest {
+	
+	
 	
 	@Before
 	public void prepareTests(){		
@@ -44,14 +51,15 @@ public class ReportByUserCategQuarterReducerTest {
 		try {
 			//Given
 			int userId = 1;
-			UserCategoryId uidCatId = new UserCategoryId(userId, 2);
+			int categoryId = 2;
+			UserCategoryId uidCatId = new UserCategoryId(userId, categoryId);
 			
 			ProductIdQuantityQuarter[] values = new ProductIdQuantityQuarter[5];
-			values[0] = new ProductIdQuantityQuarter(1, 10, (byte)0);
-			values[1] = new ProductIdQuantityQuarter(2, 10, (byte)0);
-			values[2] = new ProductIdQuantityQuarter(2, 10, (byte)1);
-			values[3] = new ProductIdQuantityQuarter(4, 10, (byte)1);
-			values[4] = new ProductIdQuantityQuarter(9998, 10, (byte)3);
+			values[0] = new ProductIdQuantityQuarter(1, 10, Q1);
+			values[1] = new ProductIdQuantityQuarter(2, 10, Q1);
+			values[2] = new ProductIdQuantityQuarter(2, 10, Q2);
+			values[3] = new ProductIdQuantityQuarter(4, 10, Q2);
+			values[4] = new ProductIdQuantityQuarter(9998, 10, Q4);
 			
 			//When
 			Context context = mock(Context.class);
@@ -59,10 +67,10 @@ public class ReportByUserCategQuarterReducerTest {
 			reducer.reduce(uidCatId, Arrays.asList(values), context);
 			
 			//Then
-			DataByCatIdAndQuarter outValue1 = new DataByCatIdAndQuarter(2, (byte)0, 20, 17.5);
-			DataByCatIdAndQuarter outValue2 = new DataByCatIdAndQuarter(2, (byte)1, 20, 17.5);
-			DataByCatIdAndQuarter outValue3 = new DataByCatIdAndQuarter(2, (byte)2, 0, 0);
-			DataByCatIdAndQuarter outValue4 = new DataByCatIdAndQuarter(2, (byte)3, 10, 300.0);
+			DataByCatIdAndQuarter outValue1 = new DataByCatIdAndQuarter(categoryId, Q1, 20, 17.5);
+			DataByCatIdAndQuarter outValue2 = new DataByCatIdAndQuarter(categoryId, Q2, 20, 17.5);
+			DataByCatIdAndQuarter outValue3 = new DataByCatIdAndQuarter(categoryId, Q3, 0, 0);
+			DataByCatIdAndQuarter outValue4 = new DataByCatIdAndQuarter(categoryId, Q4, 10, 300.0);
 			
 			IntWritable userIdWritable = new IntWritable(userId);
 			verify(context).write(userIdWritable, outValue1);

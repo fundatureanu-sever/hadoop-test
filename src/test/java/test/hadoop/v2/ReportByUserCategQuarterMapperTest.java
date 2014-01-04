@@ -2,6 +2,7 @@ package test.hadoop.v2;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import dev.hadoop.metadata.MetadataProvider;
+import dev.hadoop.v1.ReportByUserIdMapper;
 import dev.hadoop.v2.ReportByUserCategQuarterMapper;
 import dev.hadoop.v2.intermediate.ProductIdQuantityQuarter;
 import dev.hadoop.v2.intermediate.UserCategoryId;
@@ -89,7 +91,43 @@ public class ReportByUserCategQuarterMapperTest {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testUnexpectedNumberOfElementsInput_Mapper(){
+		ReportByUserIdMapper mapper = new ReportByUserIdMapper();
 		
+		Context context = mock(Context.class);
+		try {
+			String inputLine = "2013-01-01	1	1	10";
+			
+			mapper.map(new LongWritable(10), new Text(inputLine), context);
+					
+			verifyZeroInteractions(context);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	@Test
+	public void testUnexpectedDateFormatInput_Mapper(){
+		ReportByUserIdMapper mapper = new ReportByUserIdMapper();
+		
+		Context context = mock(Context.class);
+		try {
+			String inputLine = "01.01.2013	10000	1	1	1	10";
+			
+			mapper.map(new LongWritable(10), new Text(inputLine), context);
+			
+			verifyZeroInteractions(context);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} 
 	}
 
 }

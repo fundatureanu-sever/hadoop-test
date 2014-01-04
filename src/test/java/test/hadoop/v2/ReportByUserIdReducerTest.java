@@ -19,6 +19,11 @@ import dev.hadoop.metadata.MetadataProvider;
 import dev.hadoop.v2.ReportByUserIdReducer;
 import dev.hadoop.v2.intermediate.DataByCatIdAndQuarter;
 
+import static dev.hadoop.constants.Constants.Q1;
+import static dev.hadoop.constants.Constants.Q2;
+import static dev.hadoop.constants.Constants.Q3;
+import static dev.hadoop.constants.Constants.Q4;
+
 public class ReportByUserIdReducerTest {
 
 	@Before
@@ -41,23 +46,28 @@ public class ReportByUserIdReducerTest {
 	public void testExpectedInput_Reducer(){
 		try {
 			//Given
+			
 			IntWritable userId = new IntWritable(1);
 			
 			DataByCatIdAndQuarter []userInfo = new DataByCatIdAndQuarter[12];
-			userInfo[0] = new DataByCatIdAndQuarter(0, (byte)0, 10, 50.0);
-			userInfo[1] = new DataByCatIdAndQuarter(0, (byte)1, 20, 30.0);
-			userInfo[2] = new DataByCatIdAndQuarter(0, (byte)2, 20, 30.0);
-			userInfo[3] = new DataByCatIdAndQuarter(0, (byte)3, 20, 30.0);
 			
-			userInfo[4] = new DataByCatIdAndQuarter(1, (byte)0, 20, 20.0);
-			userInfo[5] = new DataByCatIdAndQuarter(1, (byte)1, 20, 20.0);
-			userInfo[6] = new DataByCatIdAndQuarter(1, (byte)2, 20, 10.0);
-			userInfo[7] = new DataByCatIdAndQuarter(1, (byte)3, 20, 20.0);
+			int categoryId = 0;
+			userInfo[0] = new DataByCatIdAndQuarter(categoryId, Q1, 10, 50.0);
+			userInfo[1] = new DataByCatIdAndQuarter(categoryId, Q2, 20, 30.0);
+			userInfo[2] = new DataByCatIdAndQuarter(categoryId, Q3, 20, 30.0);
+			userInfo[3] = new DataByCatIdAndQuarter(categoryId, Q4, 20, 30.0);
 			
-			userInfo[8] = new DataByCatIdAndQuarter(2, (byte)0, 30, 10.0);
-			userInfo[9] = new DataByCatIdAndQuarter(2, (byte)1, 30, 10.0);
-			userInfo[10] = new DataByCatIdAndQuarter(2, (byte)2, 30, 70.0);
-			userInfo[11] = new DataByCatIdAndQuarter(2, (byte)3, 30, 10.0);
+			categoryId = 1;
+			userInfo[4] = new DataByCatIdAndQuarter(categoryId, Q1, 20, 20.0);
+			userInfo[5] = new DataByCatIdAndQuarter(categoryId, Q2, 20, 20.0);
+			userInfo[6] = new DataByCatIdAndQuarter(categoryId, Q3, 20, 10.0);
+			userInfo[7] = new DataByCatIdAndQuarter(categoryId, Q4, 20, 20.0);
+			
+			categoryId = 2;
+			userInfo[8] = new DataByCatIdAndQuarter(categoryId, Q1, 30, 10.0);
+			userInfo[9] = new DataByCatIdAndQuarter(categoryId, Q2, 30, 10.0);
+			userInfo[10] = new DataByCatIdAndQuarter(categoryId, Q3, 30, 70.0);
+			userInfo[11] = new DataByCatIdAndQuarter(categoryId, Q4, 30, 10.0);
 			
 			//When
 			ReportByUserIdReducer reducer = new ReportByUserIdReducer();
