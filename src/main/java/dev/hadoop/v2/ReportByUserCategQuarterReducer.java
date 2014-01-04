@@ -22,7 +22,7 @@ public class ReportByUserCategQuarterReducer extends Reducer<UserCategoryId, Pro
 
 	@Override
 	public void setup(Context context) throws IOException, InterruptedException {
-		String productsFileName = MetadataProvider.METADATA_FILENAME_BASE+"_products";
+		String productsFileName = "products";
 		
 		BufferedReader productsReader = new BufferedReader(new FileReader(productsFileName));
 

@@ -26,7 +26,7 @@ public class ReportByUserIdReducer extends Reducer<IntWritable, DataByCatIdAndQu
 	
 	@Override
 	public void setup(Context context) throws IOException, InterruptedException {
-		String categoryFileName = MetadataProvider.METADATA_FILENAME_BASE+"_categories";
+		String categoryFileName = "categories";
 		
 		BufferedReader categoryReader = new BufferedReader(new FileReader(categoryFileName));
 

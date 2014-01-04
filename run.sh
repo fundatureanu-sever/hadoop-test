@@ -1,3 +1,3 @@
 #!/bin/bash
-mvn exec:java -Dexec.mainClass="dev.hadoop.ReportDriver" -Dexec.args="1 input/ output" 
+mvn exec:java -Dexec.mainClass="dev.hadoop.v2.ReportDriver" -Dexec.args="1 input/ output" 
 

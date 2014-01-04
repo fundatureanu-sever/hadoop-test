@@ -10,13 +10,13 @@ import static dev.hadoop.constants.Constants.EOL;
 
 public class ExtendedJDBCMetadataProvider extends AbstractJDBCMetadataProvider {
 
-	public static final String CATEGORIES_META_FILENAME = METADATA_FILENAME_BASE+"_categories";
-	public static final String PRODUCTS_META_FILENAME = METADATA_FILENAME_BASE+"_products";
+	public static final String CATEGORIES_META_FILENAME = "categories#categories";
+	public static final String PRODUCTS_META_FILENAME = "products#products";
 
 	@Override
 	protected String[] processResults(ResultSet results) throws IOException, SQLException {
-		FileWriter productsWriter = new FileWriter(PRODUCTS_META_FILENAME);//productId - categoryId - price 
-		FileWriter categoriesWriter = new FileWriter(CATEGORIES_META_FILENAME);//categoryId - categoryName
+		FileWriter productsWriter = new FileWriter("products");//productId - categoryId - price 
+		FileWriter categoriesWriter = new FileWriter("categories");//categoryId - categoryName
 		
 		HashMap<String, Integer> categoryMap = new HashMap<String, Integer>();
 		int categoryIdCounter = 0;

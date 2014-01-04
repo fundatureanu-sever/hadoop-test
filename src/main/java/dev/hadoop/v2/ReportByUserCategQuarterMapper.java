@@ -32,7 +32,7 @@ public class ReportByUserCategQuarterMapper extends Mapper<LongWritable, Text, U
 	
 	@Override
 	public void setup(Context context) throws IOException, InterruptedException {
-		String productsFileName = MetadataProvider.METADATA_FILENAME_BASE+"_products";
+		String productsFileName = "products";
 		
 		BufferedReader productsReader = new BufferedReader(new FileReader(productsFileName));
 

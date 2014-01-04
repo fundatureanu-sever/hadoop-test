@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -88,9 +89,18 @@ public class ReportDriver extends Configured implements Tool{
 													inputRecordSize, mapOutputRecordSize, 1);
 		configureShuffle(conf, shuffleOptimizer);
 		
+		FileSystem fs = FileSystem.get(conf);
+		for (int i = 0; i < metadataFileURIs.length; i++) {
+			System.out.println(metadataFileURIs[i]);
+			fs.copyFromLocalFile(new Path(metadataFileURIs[i].split("#")[0]), new Path(metadataFileURIs[i]));
+			DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
+		}		
+		DistributedCache.createSymlink(conf);
+		
 		Job j = new Job(conf);
 		j.setJobName("ReportByUserIDCategoryQuarter");
 		
+		j.setJarByClass(ReportDriver.class);
 		j.setMapperClass(ReportByUserCategQuarterMapper.class);
 		j.setReducerClass(ReportByUserCategQuarterReducer.class);
 		
@@ -108,10 +118,6 @@ public class ReportDriver extends Configured implements Tool{
 		
 		j.setNumReduceTasks((int)(numberOfNodes*1.75));
 		
-		for (int i = 0; i < metadataFileURIs.length; i++) {
-			DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
-		}		
-		DistributedCache.createSymlink(conf);
 		
 		return j;
 	}
@@ -131,9 +137,18 @@ public class ReportDriver extends Configured implements Tool{
 													inputRecordSize, mapOutputRecordSize, 1);
 		configureShuffle(conf, shuffleOptimizer);
 		
+		//FileSystem fs = FileSystem.get(conf);
+		for (int i = 0; i < metadataFileURIs.length; i++) {
+			System.out.println(metadataFileURIs[i]);
+			//fs.copyFromLocalFile(new Path(metadataFileURIs[i].split("#")[0]), new Path(metadataFileURIs[i]));
+			DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
+		}		
+		DistributedCache.createSymlink(conf);
+		
 		Job j = new Job(conf);
 		j.setJobName("ReportByUserID");
 		
+		j.setJarByClass(ReportDriver.class);
 		j.setMapperClass(Mapper.class);
 		j.setReducerClass(ReportByUserIdReducer.class);
 		
@@ -151,11 +166,6 @@ public class ReportDriver extends Configured implements Tool{
 		TextOutputFormat.setOutputPath(j, new Path(outputPath));
 		
 		configurePartitioner(conf, j, inputPath);	
-		
-		for (int i = 0; i < metadataFileURIs.length; i++) {
-			DistributedCache.addCacheFile(new URI(metadataFileURIs[i]), conf);
-		}		
-		DistributedCache.createSymlink(conf);
 		
 		j.setNumReduceTasks((int)(numberOfNodes*1.75));
 		
