@@ -52,15 +52,7 @@ public class ReportDriver extends Configured implements Tool{
 	
 	@Override
 	public int run(String[] args) throws Exception {
-		int numberOfNodes = Integer.parseInt(args[0]);
-		boolean isLocal;
-		if (args[1].equals("local")){
-			isLocal = true;
-		}
-		else{
-			isLocal = false;
-		}
-		
+		int numberOfNodes = Integer.parseInt(args[0]);		
 		
 		MetadataProvider metadataProvider = new ExtendedJDBCMetadataProvider();
 		String[] metadataFileURIs = metadataProvider.generateMetadata();
